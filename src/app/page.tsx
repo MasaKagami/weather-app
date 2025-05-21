@@ -7,7 +7,7 @@ import { WEATHER_API_KEY } from "@/utils/constants";
 import { useQuery } from "@tanstack/react-query";
 import axios from "axios";
 import { format, parseISO } from "date-fns";
-import { Calendar } from "lucide-react";
+import { Calendar, Clock } from "lucide-react";
 
 type WeatherForecastResponse = {
   cod: string;
@@ -73,7 +73,7 @@ export default function Home() {
     queryKey: ['repoData'],
     queryFn: async () => {
       const { data } = await axios.get(
-        `https://api.openweathermap.org/data/2.5/forecast?q=tokyo&appid=${process.env.NEXT_PUBLIC_WEATHER_KEY}&cnt=56`
+        `https://api.openweathermap.org/data/2.5/forecast?q=montreal&appid=${process.env.NEXT_PUBLIC_WEATHER_KEY}&cnt=56`
       );
       return data;
     }
@@ -90,6 +90,7 @@ export default function Home() {
     // return celsius
   }
 
+  // loading animation
   if (isPending) return(
     <div className="flex items-center h-screen justify-center">
       <div className="container">
@@ -110,11 +111,11 @@ export default function Home() {
   return (
     <div className="bg-flex flex-col gap-4 h-screen max-h-screen">
       <Navbar/>
-      <main className="flex text-white">
+      <main className="flex text-white gap-2">
         {/* section for today data and 10-day forecast */}
         <section className="flex flex-col gap-2 w-full max-w-xs">
           {/* today */}
-          <div className="bg-gray-800 rounded-2xl p-5 w-full">
+          <div className="bg-black/90 rounded-2xl p-5 w-full">
             <div className="flex w-full justify-between">
               <h1>{format(parseISO(firstData?.dt_txt ?? ''), 'EEEE') }</h1>
               <p>{format(parseISO(firstData?.dt_txt ?? ''), 'dd/MM/yyyy') }</p>
@@ -131,26 +132,43 @@ export default function Home() {
           </div>
           
           {/* 10-day */}
-          <div className="flex flex-col bg-gray-800 rounded-2xl p-5">
+          <div className="flex flex-col bg-black/90 rounded-2xl p-5">
             <p className="flex gap-2 items-center"> <Calendar className="w-5 h-5" /> 10 Day Forecast</p>
           </div>
         </section>
 
         {/* section for information 1 */}
-        <section className="flex flex-col gap-2 w-full max-w-lg">
+        <section className="flex flex-col gap-2 w-auto">
+          <div className="bg-black/90 rounded-2xl p-5 w-full">
+            <div className="mb-2 flex items-center gap-2">
+              <Clock className="w-5 h-5" />
+              <h2 className="">24-Hour Forecast</h2>
+            </div>
+            
+            <div className="flex gap-4 overflow-x-auto">
+              {data?.list.slice(0, 8).map((d, i) => (
+                <div key={i} className="flex items-center flex-col gap-4">
+                  <p className="whitespace-nowrap text-xs text-white/50">{format(parseISO(d.dt_txt), 'h a')}</p>
+                  <WeatherIcon iconName={d.weather[0].icon}/>
+                  <h1 className="text-center">{kelvinToCelsius(d?.main.temp ?? 0)}°</h1>
+                </div>
+              ))}
+            </div>
+          </div>
+
           {/* day for the day */}          
-          <div className="bg-gray-800 rounded-2xl p-5 flex gap-2 overflow-x-auto w-full">
-            {data?.list.map((d,i) => (
+          {/* <div className="bg-black/90 rounded-2xl p-5 flex gap-2 overflow-x-auto w-full">
+            {next24HoursForecast.map((d,i) => (
               <div key={i} className="flex items-center flex-col gap-2">
                 <p className="whitespace-nowrap">{format(parseISO(d.dt_txt), 'h:mm a') }</p>
-                <WeatherIcon iconName={d.weather[0].icon}/>
-                {/* <h1 className="text-center">{kelvinToCelsius(data?.list[d].main.temp)}°</h1> */}
+                <WeatherIcon iconName={d.weather[0].icon} className="w-6 h-6"/>
                 <h1 className="text-center">{kelvinToCelsius(d?.main.temp ?? 0)}°</h1>
 
               </div>
             ))}
-          </div>
-  {/* // const firstData = data?.list[0]; */}
+          </div> */}
+
+
 
         </section>
 
